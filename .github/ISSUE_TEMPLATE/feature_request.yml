@@ -1,0 +1,47 @@
+name: 功能建议
+description: 想要新功能，或现有行为用着别扭
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        项目定位很窄：**把 iPhone 提醒事项原样放到 Windows 桌面，尽量贴近 iOS 的样子**。明显偏离这个定位的建议（比如做日历、做笔记、做多账号同步盘）大概率不会被采纳，先说一声免得你等。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你遇到的问题
+      description: 先讲场景，不要直接讲方案。你现在是怎么绕过去的？
+      placeholder: 我每天要看好几次「今天到期」的条目，现在得滚到列表里一条条找，很慢。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 你希望变成什么样
+      placeholder: 顶部计数旁边加一行「今天 3 条」，点它只显示今天到期的。
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 涉及部分
+      multiple: true
+      options:
+        - 界面 / 版式
+        - 编辑与详情
+        - 日期与提醒
+        - 同步（CloudKit）
+        - Bark 推送
+        - 安装 / 卸载
+        - 其它
+
+  - type: textarea
+    id: ios
+    attributes:
+      label: iOS 上对应的行为
+      description: 如果 iPhone 提醒事项里有对应做法，描述一下或给张截图 —— 这个项目优先对齐 iOS。
+    validations:
+      required: false

@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: 语法 / 版本 / 隐私 / 编译
+    runs-on: windows-latest
+    steps:
+      - name: 检出
+        uses: actions/checkout@v4
+
+      - name: 安装 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: JS 语法检查
+        shell: pwsh
+        run: |
+          $files = @('server.js') + (Get-ChildItem -Recurse -Filter *.js -Path lib, public, tools | ForEach-Object { $_.FullName })
+          $failed = @()
+          foreach ($f in $files) {
+            node --check $f
+            if ($LASTEXITCODE -ne 0) { $failed += $f }
+          }
+          "检查了 $($files.Count) 个文件"
+          if ($failed.Count -gt 0) {
+            Write-Error "语法错误: $($failed -join ', ')"
+            exit 1
+          }
+
+      - name: 版本号一致性
+        shell: pwsh
+        run: |
+          $lib = (Select-String -Path 'lib/version.js' -Pattern "VERSION\s*=\s*'([0-9.]+)'").Matches[0].Groups[1].Value
+          $host_ = (Select-String -Path 'host/widget-host.cs' -Pattern 'APP_VERSION\s*=\s*"([0-9.]+)"').Matches[0].Groups[1].Value
+          $log = (Select-String -Path 'CHANGELOG.md' -Pattern '^## V([0-9.]+)' | Select-Object -First 1).Matches[0].Groups[1].Value
+          "lib/version.js : $lib"
+          "host           : $host_"
+          "CHANGELOG      : $log"
+          if ($lib -ne $host_ -or $lib -ne $log) {
+            Write-Error "版本号不一致：三处必须相同（见 RELEASE.md 第一节）"
+            exit 1
+          }
+
+      - name: 隐私入口检查
+        shell: pwsh
+        run: |
+          $tracked = git ls-files
+          $bad = $tracked | Where-Object {
+            $_ -match '(^|/)(icloud-session\.json|settings\.json|pushed\.json|privacy\.local\.txt)$' -or
+            $_ -match '^browser-profile/' -or
+            $_ -match '^(dist|node|shots)/' -or
+            $_ -match '\.(exe|pdb|zip)$'
+          }
+          if ($bad) {
+            Write-Error "这些文件不该入库：$($bad -join ', ')"
+            exit 1
+          }
+
+          $textFiles = $tracked | Where-Object { $_ -match '\.(js|json|md|cs|csproj|ps1|bat|html|css|txt|yml|yaml)$' }
+          $leaks = @()
+          foreach ($f in $textFiles) {
+            $hit = Select-String -Path $f -Pattern 'C:\\Users\\[A-Za-z0-9_-]{2,}\\|"(key|device_key)"\s*:\s*"[A-Za-z0-9]{20,}"' -ErrorAction SilentlyContinue
+            if ($hit) { $leaks += $hit }
+          }
+          if ($leaks.Count -gt 0) {
+            $leaks | ForEach-Object { Write-Host "$($_.Path):$($_.LineNumber): $($_.Line.Trim())" }
+            Write-Error "疑似本机路径或密钥"
+            exit 1
+          }
+          "扫描了 $($textFiles.Count) 个文本文件，未发现本机路径或密钥"
+
+      - name: 编译原生宿主
+        shell: pwsh
+        run: |
+          dotnet build host/WidgetHost.csproj -c Release -p:DebugType=None -p:DebugSymbols=false --no-incremental
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          if (-not (Test-Path 'host/bin/Release/RemindersWidget.exe')) {
+            Write-Error "宿主未产出 RemindersWidget.exe"
+            exit 1
+          }
+
+      - name: 冒烟：服务能起、接口能应答
+        shell: pwsh
+        run: |
+          $proc = Start-Process -FilePath 'node' -ArgumentList 'server.js' -PassThru -WindowStyle Hidden
+          try {
+            $ok = $false
+            for ($i = 0; $i -lt 20; $i++) {
+              Start-Sleep -Milliseconds 500
+              try {
+                $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8642/api/settings' -UseBasicParsing -TimeoutSec 3
+                if ($r.StatusCode -eq 200) { $ok = $true; break }
+              } catch { }
+            }
+            if (-not $ok) { Write-Error "/api/settings 无响应"; exit 1 }
+            $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8642/api/settings' -UseBasicParsing -TimeoutSec 5
+            $json = $r.Content | ConvertFrom-Json
+            "versionTag = $($json.versionTag)"
+            if (-not $json.versionTag) { Write-Error "接口没有返回 versionTag"; exit 1 }
+          } finally {
+            if ($proc -and -not $proc.HasExited) { Stop-Process -Id $proc.Id -Force }
+          }

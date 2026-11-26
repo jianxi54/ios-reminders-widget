@@ -1,0 +1,27 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.{bat,cmd}]
+end_of_line = crlf
+
+# PowerShell 脚本必须带 BOM，否则中文在 Windows PowerShell 5.1 下乱码
+[*.ps1]
+charset = utf-8-bom
+end_of_line = crlf
+
+[*.{cs,csproj,sln}]
+end_of_line = crlf
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_size = 2

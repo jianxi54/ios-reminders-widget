@@ -66,7 +66,7 @@ namespace RemindersWidgetHost
     {
         private const string SERVER_URL = "http://127.0.0.1:8642/";
         private const int SERVER_PORT = 8642;
-        private const string APP_VERSION = "0.01";   // 与服务端 lib/version.js 保持一致
+        private const string APP_VERSION = "0.03";   // 与服务端 lib/version.js 保持一致（CI 会校验）
 
         private WebView2 webView;
         private NotifyIcon tray;

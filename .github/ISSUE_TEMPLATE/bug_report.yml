@@ -1,0 +1,89 @@
+name: Bug 报告
+description: 功能异常、崩溃、同步不对、界面错位
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提之前先搜一下已有 Issue。**不要把 `%LOCALAPPDATA%\RemindersWidget\` 整个目录压缩后发上来** —— 里面有 iCloud 登录令牌。只需要诊断信息那段文字。
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: 前置检查
+      options:
+        - label: 我已在 Issues 里搜索过，没有重复
+          required: true
+        - label: 我使用的是最新 Release 版本
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: 小组件版本
+      description: 设置抽屉底部，或托盘提示里显示的 V0.0x
+      placeholder: V0.03
+    validations:
+      required: true
+
+  - type: input
+    id: windows
+    attributes:
+      label: Windows 版本
+      description: Win+R 输入 `winver` 可以看
+      placeholder: Windows 11 23H2 (22631.4317)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: syncmode
+    attributes:
+      label: 同步模式
+      description: 设置 → 关于 → 诊断信息里的 `mode`，或界面右下角提示
+      options:
+        - live（连的是真实 iCloud）
+        - demo / offline（没登录成功，用的是示例数据）
+        - 不知道
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: 发生了什么
+      description: 期望的行为 vs 实际的行为
+      placeholder: |
+        期望：改完日期，iPhone 上立刻变
+        实际：iPhone 上还是旧日期，点刷新也没用
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开某列表
+        2. 点某条目，把日期改到明天
+        3. 保存
+        4. iPhone 下拉刷新 → 日期没变
+    validations:
+      required: true
+
+  - type: textarea
+    id: diag
+    attributes:
+      label: 诊断信息
+      description: |
+        设置 → 关于 → 诊断信息，点「复制」。**先确认里面没有 Bark Key、没有长串令牌**，有就删掉再贴。
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: 截图或其它补充
+      description: 界面问题请附截图，能看出错位在哪
+    validations:
+      required: false

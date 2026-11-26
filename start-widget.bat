@@ -14,6 +14,9 @@ if exist "%DIR%host\RemindersWidget.exe" (
 )
 
 rem ---------- 回退方案：找 node，隐藏窗口起服务，再用 Edge 应用窗口打开 ----------
+echo [提示] 未找到原生宿主 host\RemindersWidget.exe，以浏览器窗口模式启动。
+echo        该模式没有桌面层固定、托盘等完整功能；需要时先运行 build-host.bat 编译（要 .NET SDK）。
+
 set "NODE=%DIR%node\node.exe"
 if not exist "%NODE%" (
   for %%P in (node.exe) do if exist "%%~$PATH:P" set "NODE=%%~$PATH:P"

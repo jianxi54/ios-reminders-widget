@@ -86,7 +86,7 @@ iPhone「提醒事项」↔ Windows 11 桌面**原生小组件**。数据走 iCl
 
 ```
 login-icloud.bat      浏览器登录取会话（密码不落盘，只存 cookie+dsid）
-start-widget.bat / host/RemindersWidget.exe
+start-widget.bat / host/RemindersWidget.exe   （exe 由 build-host.bat 生成，不入库）
 server.js             本地服务 + Bark 调度
 lib/cloudkit.js        CloudKit 读写、protobuf 编解码、日期/提醒
 lib/settings.js        本地设置（ui.theme、bark）

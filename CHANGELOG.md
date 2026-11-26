@@ -29,9 +29,22 @@
 - 命中即中止打包。这条检查在本次抓到一个真实问题：宿主 exe 里带着 `obj\Release\RemindersWidget.pdb` 的绝对路径（CodeView 记录）。宿主改为 `-p:DebugType=None --no-incremental` 编译，产物不再含本机路径。
 
 ### 5. 开源准备
-- 新增 `LICENSE`（MIT）、`THIRD-PARTY-NOTICES.txt`（Node.js、WebView2）、`.gitignore`。
+- 新增 `LICENSE`（MIT，版权人 jianxi54）、`THIRD-PARTY-NOTICES.txt`（Node.js、WebView2）、`.gitignore`。
 - `README.md` 重写为面向使用者的版本：安装步骤、功能、隐私说明、CloudKit 技术细节、常见问题、从源码构建。
 - 新增 `tools/doc-shots.js`：用临时数据目录起 demo 服务，生成 `docs/` 下的明暗两张截图，不接触真实清单。
+- 补齐仓库标准文件：`CONTRIBUTING.md`、`CODE_OF_CONDUCT.md`（Contributor Covenant 2.1）、`SECURITY.md`、`RELEASE.md`（发版流程）。
+- 新增 `.github/`：Bug / 功能建议 Issue 表单、PR 模板、`release.yml`（Release Notes 分类）、`workflows/ci.yml`（JS 语法、版本一致性、隐私入口、宿主编译、接口冒烟）。
+- 新增 `.gitattributes`（bat/ps1/cs 强制 CRLF，二进制不做转换）、`.editorconfig`（ps1 保留 BOM）。
+- 不再提交编译产物 `host\RemindersWidget.exe`：clone 后由 `build-host.bat` 生成；`start-widget.bat` 找不到宿主时给出提示并回退浏览器窗口模式。
+
+### 6. 修了一处版本号不同步
+- 托盘提示里的版本读的是 `host\widget-host.cs` 的 `APP_VERSION`，V0.02、V0.03 两次迭代只改了 `lib/version.js`，宿主里还停在 `0.01`，导致托盘显示 `V0.01`。
+- 已改为 `0.03`；`public/index.html` 的静态占位也从 `V0.01` 改成 `V0.03`（首帧不会再闪一下旧版本号）。
+- 根因是三处版本号靠人手同步。已在 CI 里加校验：`lib/version.js`、`host\widget-host.cs`、`CHANGELOG.md` 最新一节三者不一致就直接失败。
+
+### 7. 发布
+- 仓库地址：<https://github.com/jianxi54/ios-reminders-widget>
+- 首个 Release `v0.03`，附安装包与 SHA256。
 
 ### 验证
 - 静默安装 → 20 个文件 / 84.1 MB（卸载器 36 KB）→ 用安装目录自带的 `node\node.exe` 起服务 → `mode=live`，140 条数据正常。

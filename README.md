@@ -1,5 +1,10 @@
 # 提醒事项小组件 · Windows 11
 
+[![Release](https://img.shields.io/github/v/release/jianxi54/ios-reminders-widget?sort=semver&color=blue)](https://github.com/jianxi54/ios-reminders-widget/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0078D6)](#下载安装)
+[![CI](https://github.com/jianxi54/ios-reminders-widget/actions/workflows/ci.yml/badge.svg)](https://github.com/jianxi54/ios-reminders-widget/actions/workflows/ci.yml)
+
 把 iPhone 上的「提醒事项」放到 Windows 桌面：一个 420×400 的原生小窗口，无边框、20px 圆角、固定在桌面层，不挡其他窗口，按 `Win+D` 也不受影响。
 
 读写走 Apple 的 CloudKit 私有库，和 iPhone、iPad、Mac 实时一致。改标题、拖日期、勾完成，手机下一秒就变。
@@ -19,10 +24,13 @@
 | 运行时 | WebView2（Windows 11 自带；Windows 10 缺失时安装向导会提示） |
 | 权限 | 无需管理员权限，装到当前用户目录 |
 
-1. 下载 `RemindersWidget-Setup-v0.03.exe`，双击，按向导完成（可选桌面快捷方式、开机自启）。
+1. 到 [Releases](https://github.com/jianxi54/ios-reminders-widget/releases/latest) 下载 `RemindersWidget-Setup-v0.03.exe`，双击，按向导完成（可选桌面快捷方式、开机自启）。
 2. 首次启动后点右上角齿轮 → **打开浏览器登录**。
 3. 在弹出的浏览器窗口里用 Apple ID 登录（含双重验证）。登录完成后窗口自动同步。
 4. 想收手机推送，在设置里填 Bark 的 Key（见下文）。
+
+> 安装包没有代码签名，首次运行 Windows 会弹「已保护你的电脑」→ 点**更多信息 → 仍要运行**。校验文件完整性：
+> `Get-FileHash .\RemindersWidget-Setup-v0.03.exe -Algorithm SHA256`，与 Release 页面上的 `.sha256` 对照。
 
 卸载：Windows 设置 → 应用 → 提醒事项小组件 → 卸载；也可以直接运行安装目录里的 `Uninstall.exe`。
 
@@ -174,7 +182,7 @@ ios-reminders-widget/
 │  ├─ bark.js               Bark 推送
 │  └─ version.js            版本号（唯一来源）
 ├─ public/                  前端（index.html / app.js / style.css）
-├─ host/                    WinForms + WebView2 原生宿主（C#）
+├─ host/                    WinForms + WebView2 原生宿主（C#，net48）
 ├─ packaging/
 │  ├─ build.ps1             一键打包
 │  ├─ make-icon.ps1         生成图标
@@ -182,6 +190,9 @@ ios-reminders-widget/
 │  └─ uninstall/            卸载器（复用安装器源码，不含载荷）
 ├─ tools/                   开发与验收脚本
 ├─ docs/                    截图
+├─ .github/                 CI、Issue 表单、PR 模板
+├─ CHANGELOG.md             每个版本的改动明细
+├─ SPEC.md                  功能清单（只写留下来的功能）
 └─ dist/                    构建产物（不提交）
 ```
 
@@ -197,8 +208,32 @@ ios-reminders-widget/
 
 ---
 
+## 参与贡献
+
+问题、建议、PR 都欢迎。
+
+- 装不上、登录失败、功能不会用 → 先看上面的[常见问题](#常见问题)，再开 [Discussion](https://github.com/jianxi54/ios-reminders-widget/discussions)
+- 崩溃、同步不对、界面错位 → 用 [Bug 报告](https://github.com/jianxi54/ios-reminders-widget/issues/new?template=bug_report.yml) 表单，附诊断信息
+- 想改代码 → 先读 [CONTRIBUTING.md](CONTRIBUTING.md)
+- 安全漏洞 → **不要开 Issue**，按 [SECURITY.md](SECURITY.md) 走私密通道
+
+---
+
+## 相关文档
+
+| 文件 | 内容 |
+| --- | --- |
+| [CHANGELOG.md](CHANGELOG.md) | 每个版本改了什么、为什么 |
+| [SPEC.md](SPEC.md) | 功能清单（已废弃的功能也记着，避免又加回来） |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 本地开发、代码约定、PR 要求 |
+| [RELEASE.md](RELEASE.md) | 发版流程：定版 → 自检 → 打包 → 装机验证 → 发 Release |
+| [SECURITY.md](SECURITY.md) | 威胁模型、漏洞报告渠道 |
+| [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt) | 第三方组件许可 |
+
+---
+
 ## 许可
 
-MIT，见 [LICENSE](LICENSE)。第三方组件许可见 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt)。
+MIT License © 2026 [jianxi54](https://github.com/jianxi54)，全文见 [LICENSE](LICENSE)。第三方组件许可见 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt)。
 
 本项目为独立第三方工具，与 Apple Inc. 无关联。「iCloud」「提醒事项」「Apple ID」是 Apple Inc. 的商标，此处仅用于说明用途。使用本程序造成的任何数据问题由使用者自行承担。

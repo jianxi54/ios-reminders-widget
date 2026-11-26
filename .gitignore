@@ -13,6 +13,9 @@ obj/
 *.suo
 *.pdb
 
+# 编译产物（clone 后跑 build-host.bat 生成）
+host/RemindersWidget.exe
+
 # 本机专属的打包自检规则（含真实密钥，绝不提交）
 packaging/privacy.local.txt
 

@@ -1,0 +1,29 @@
+# 统一换行与二进制判定
+* text=auto
+
+# Windows 脚本与 C# 源码必须 CRLF（.bat 用 LF 会导致 goto/标签解析出错）
+*.bat    text eol=crlf
+*.cmd    text eol=crlf
+*.ps1    text eol=crlf
+*.cs     text eol=crlf
+*.csproj text eol=crlf
+*.sln    text eol=crlf
+
+# Web 侧统一 LF
+*.js   text eol=lf
+*.css  text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+
+# 二进制：不做换行转换，也不参与文本 diff
+*.png  binary
+*.jpg  binary
+*.ico  binary
+*.exe  binary
+*.dll  binary
+*.zip  binary
+*.pdb  binary
+
+# 让 GitHub 语言统计别把文档算进去
+docs/** linguist-documentation

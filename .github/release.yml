@@ -1,0 +1,27 @@
+# 自动生成的 Release Notes 分类（GitHub → Releases → Generate release notes 时生效）
+changelog:
+  categories:
+    - title: 新功能
+      labels:
+        - enhancement
+        - feature
+    - title: 修复
+      labels:
+        - bug
+        - fix
+    - title: 界面与版式
+      labels:
+        - ui
+    - title: 同步与数据
+      labels:
+        - cloudkit
+        - sync
+    - title: 打包与安装
+      labels:
+        - packaging
+    - title: 文档
+      labels:
+        - documentation
+    - title: 其他
+      labels:
+        - "*"

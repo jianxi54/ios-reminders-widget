@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞
+    url: https://github.com/jianxi54/ios-reminders-widget/security/advisories/new
+    about: 请走私密通道，不要开公开 Issue。
+  - name: 使用问题 / 讨论
+    url: https://github.com/jianxi54/ios-reminders-widget/discussions
+    about: 装不上、登录失败、不知道某功能怎么用，先看 README 的常见问题，再到讨论区问。
