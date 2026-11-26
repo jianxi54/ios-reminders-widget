@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>提醒事项</title>
+<script>
+/* 先定主题再渲染，避免亮色用户开窗时先闪一下深色 */
+try { if (localStorage.getItem('rw.theme') === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (e) {}
+</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23cc73e1'/%3E%3Cpath d='M20 33l8 8 16-18' stroke='%23fff' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="widget">
+
+  <header id="hero">
+    <div class="hero-text">
+      <div id="count" class="count">0</div>
+      <div id="viewTitle" class="name">提醒事项</div>
+    </div>
+
+    <div class="tools">
+      <button id="btnPin" class="icon hidden" title="固定到桌面（固定后窗口锁定、拖不动）" aria-label="固定到桌面">
+        <svg viewBox="0 0 24 24"><path d="M14.8 2.3a1 1 0 0 1 1.4 0l5.5 5.5a1 1 0 0 1-.7 1.7h-1.2l-3.3 3.3.4 3.6a1 1 0 0 1-1.7.8l-3-3-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-3-3a1 1 0 0 1 .8-1.7l3.6.4 3.3-3.3V3.9a1 1 0 0 1 .3-1.6z"/></svg>
+      </button>
+      <button id="btnRefresh" class="icon" title="立即同步" aria-label="立即同步">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4h-4"/></svg>
+      </button>
+      <button id="btnHide" class="icon hidden" title="隐藏到托盘" aria-label="隐藏到托盘">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg>
+      </button>
+      <button id="btnSettings" class="icon" title="设置" aria-label="设置">
+        <svg viewBox="0 0 24 24"><path d="M19.4 13a7.5 7.5 0 0 0 .1-1 7.5 7.5 0 0 0-.1-1l2.1-1.7a.5.5 0 0 0 .1-.6l-2-3.5a.5.5 0 0 0-.6-.2l-2.5 1a7.7 7.7 0 0 0-1.7-1L14.4 2.4a.5.5 0 0 0-.5-.4h-4a.5.5 0 0 0-.5.4l-.4 2.6a7.7 7.7 0 0 0-1.7 1l-2.5-1a.5.5 0 0 0-.6.2l-2 3.5a.5.5 0 0 0 .1.6L4.4 11a7.5 7.5 0 0 0 0 2l-2.1 1.7a.5.5 0 0 0-.1.6l2 3.5c.1.2.4.3.6.2l2.5-1a7.7 7.7 0 0 0 1.7 1l.4 2.6c0 .2.3.4.5.4h4c.2 0 .5-.2.5-.4l.4-2.6a7.7 7.7 0 0 0 1.7-1l2.5 1c.2.1.5 0 .6-.2l2-3.5a.5.5 0 0 0-.1-.6L19.4 13zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(1.5 0) scale(0.92)"/></svg>
+      </button>
+    </div>
+
+    <button id="btnDone" class="fab" title="查看已完成" aria-label="查看已完成">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round">
+        <path d="M9 7h9M9 12h9M9 17h9"/>
+        <circle cx="4.6" cy="7" r="1.1" fill="currentColor" stroke="none"/>
+        <circle cx="4.6" cy="12" r="1.1" fill="currentColor" stroke="none"/>
+        <circle cx="4.6" cy="17" r="1.1" fill="currentColor" stroke="none"/>
+      </svg>
+    </button>
+    <button id="btnBack" class="fab hidden" title="返回" aria-label="返回">
+      <svg viewBox="0 0 24 24"><path d="M14.5 4.5L7 12l7.5 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </header>
+
+  <div class="rule"></div>
+
+  <main id="list" aria-live="polite"></main>
+</div>
+
+<!-- 条目详情 / 编辑 -->
+<div id="sheetMask" class="drawer-mask hidden"></div>
+<section id="sheet" class="sheet hidden" role="dialog" aria-label="编辑提醒">
+  <div class="sheet-head">
+    <button id="btnSheetCancel" class="link">取消</button>
+    <span class="sheet-title">编辑提醒</span>
+    <button id="btnSheetSave" class="link strong">完成</button>
+  </div>
+
+  <div class="sheet-body">
+    <input id="fTitle" class="field title" maxlength="200" placeholder="提醒内容" spellcheck="false">
+    <textarea id="fNotes" class="field notes" rows="3" placeholder="添加备注（支持多行，会同步到 iPhone）" spellcheck="false"></textarea>
+
+    <div class="grp">
+      <div class="grp-label">日期</div>
+      <div class="inline">
+        <input id="fDate" type="date" class="field flex1">
+        <input id="fTime" type="time" class="field w76">
+        <button id="btnClearDue" class="chip" title="清除日期">清除</button>
+      </div>
+      <label class="switch-line compact"><span>全天</span><input id="fAllDay" type="checkbox"></label>
+    </div>
+
+    <div class="grp">
+      <div class="grp-label">提前提醒</div>
+      <select id="fAlarm" class="field"></select>
+      <div id="alarmCustomWrap" class="inline hidden">
+        <input id="fAlarmCustom" type="number" min="0" max="525600" step="1" class="field flex1" placeholder="提前多少分钟">
+        <span class="unit">分钟</span>
+      </div>
+      <div id="alarmHint" class="grp-hint"></div>
+    </div>
+
+    <div class="grp">
+      <div class="grp-label">优先级</div>
+      <div class="seg" id="fPriority">
+        <button type="button" data-p="0">无</button>
+        <button type="button" data-p="9">低</button>
+        <button type="button" data-p="5">中</button>
+        <button type="button" data-p="1">高</button>
+      </div>
+    </div>
+
+    <div class="grp">
+      <label class="switch-line"><span>添加旗标</span><input id="fFlagged" type="checkbox"></label>
+    </div>
+
+    <div class="sheet-foot">
+      <button id="btnDelete" class="danger-btn">删除提醒</button>
+    </div>
+  </div>
+</section>
+
+<!-- 设置抽屉 -->
+<div id="drawerMask" class="drawer-mask hidden"></div>
+<div id="drawer" class="drawer hidden" role="dialog" aria-label="设置">
+  <div class="drawer-head">
+    <h2>设置</h2>
+    <button id="btnCloseDrawer" class="icon" title="关闭" aria-label="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  <h3 class="sec-title">外观</h3>
+  <div class="seg" id="fTheme">
+    <button type="button" data-t="light">明亮</button>
+    <button type="button" data-t="dark">暗色</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <h3 class="sec-title">Bark 推送（iPhone 通知）</h3>
+  <label class="switch-line"><span>到期时推送到手机</span><input id="barkEnabled" type="checkbox"></label>
+  <label class="fl"><span>服务器</span><input id="barkServer" class="field" placeholder="https://api.day.app" spellcheck="false"></label>
+  <label class="fl"><span>设备 Key</span><input id="barkKey" class="field" placeholder="Bark App 首页里那串 Key" spellcheck="false"></label>
+  <label class="fl"><span>分组</span><input id="barkGroup" class="field" placeholder="提醒事项" spellcheck="false"></label>
+  <label class="fl"><span>提示音</span><input id="barkSound" class="field" placeholder="留空用默认" spellcheck="false"></label>
+  <div class="fl"><span>中断级别</span>
+    <select id="barkLevel" class="field">
+      <option value="active">active（默认）</option>
+      <option value="timeSensitive">timeSensitive（时效性）</option>
+      <option value="passive">passive（静默）</option>
+      <option value="critical">critical（重要警告）</option>
+    </select>
+  </div>
+  <label class="switch-line compact"><span>没设提前提醒的，到期也推</span><input id="barkOnDue" type="checkbox"></label>
+  <div class="drawer-actions second">
+    <button id="btnBarkSave" class="primary">保存推送设置</button>
+    <button id="btnBarkTest" class="subtle">发送测试</button>
+  </div>
+  <div class="grp-hint">手机上装 Bark App，复制首页的 Key 填进来即可。推送在「到期时间 − 提前提醒」那一刻发出。</div>
+
+  <div class="divider"></div>
+
+  <h3 class="sec-title">iCloud 同步</h3>
+  <div class="session-box">
+    <div class="session-row"><span>登录状态</span><b id="sessionState">检查中…</b></div>
+    <div class="session-row"><span>账户</span><b id="sessionAccount">—</b></div>
+    <div class="session-row"><span>区域</span><b id="sessionHost">—</b></div>
+  </div>
+
+  <div class="grp-hint">登录会弹出独立浏览器窗口，在里面输入 Apple ID 与双重验证码（密码不经过小组件）。</div>
+
+  <div id="cfgError" class="cfg-error hidden"></div>
+
+  <div class="drawer-actions">
+    <button id="btnLogin" class="primary">打开浏览器登录</button>
+    <button id="btnReload" class="subtle">刷新会话</button>
+  </div>
+  <div class="drawer-actions second">
+    <button id="btnDiagnose" class="subtle">诊断</button>
+    <button id="btnDisconnect" class="subtle hidden">断开连接</button>
+  </div>
+
+  <pre id="diagOut" class="diag-out hidden"></pre>
+
+  <div class="ver-line"><span id="appVer">V0.01</span></div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

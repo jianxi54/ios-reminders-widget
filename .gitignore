@@ -1,0 +1,30 @@
+# 依赖与构建产物
+node_modules/
+node/
+dist/
+packaging/_work/
+packaging/runtime/
+packaging/setup/payload.zip
+packaging/setup/BuildInfo.cs
+packaging/setup/app.ico
+bin/
+obj/
+*.user
+*.suo
+*.pdb
+
+# 本机专属的打包自检规则（含真实密钥，绝不提交）
+packaging/privacy.local.txt
+
+# 本地数据（绝不能提交：含 iCloud 会话与 Bark Key）
+settings.json
+pushed.json
+icloud-session.json
+browser-profile/
+
+# 截图与临时文件
+shots/
+_shot.png
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,22 @@
+THIRD-PARTY NOTICES
+
+本程序在安装包内附带以下第三方组件，其版权归各自作者所有。
+
+1. Node.js
+   https://nodejs.org
+   版本: 22.x
+   许可: MIT
+   Copyright Node.js contributors. All rights reserved.
+   Copyright Joyent, Inc. and other Node contributors. All rights reserved.
+   完整许可文本见 https://github.com/nodejs/node/blob/main/LICENSE
+
+2. Microsoft Edge WebView2 SDK
+   Microsoft.Web.WebView2.Core.dll / Microsoft.Web.WebView2.WinForms.dll / WebView2Loader.dll
+   许可: Microsoft 软件许可条款（允许随应用程序再分发）
+   https://learn.microsoft.com/microsoft-edge/webview2/
+
+3. .NET Framework
+   安装程序基于 .NET Framework 4.8 构建，运行时由 Windows 提供。
+
+本程序为独立第三方工具，与 Apple Inc. 无任何关联。
+"iCloud"、"提醒事项"、"Apple ID" 等为 Apple Inc. 的商标，仅用于说明用途。

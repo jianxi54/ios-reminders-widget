@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>Uninstall</AssemblyName>
+    <RootNamespace>RemindersSetup</RootNamespace>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <!-- 复用安装器源码，去掉安装载荷，只保留卸载能力 -->
+    <DefineConstants>$(DefineConstants);UNINSTALLER</DefineConstants>
+    <ApplicationManifest>..\setup\app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\setup\app.ico</ApplicationIcon>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Company>RemindersWidget</Company>
+    <Product>RemindersWidget</Product>
+    <AssemblyTitle>RemindersWidget Uninstaller</AssemblyTitle>
+    <FileVersion>0.03.0.0</FileVersion>
+    <AssemblyVersion>0.03.0.0</AssemblyVersion>
+    <DebugType>none</DebugType>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\setup\Setup.cs" Link="Setup.cs" />
+    <Compile Include="..\setup\BuildInfo.cs" Link="BuildInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+  </ItemGroup>
+
+</Project>
