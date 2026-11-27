@@ -30,7 +30,7 @@
 4. 想收手机推送，在设置里填 Bark 的 Key（见下文）。
 
 > 安装包没有代码签名，首次运行 Windows 会弹「已保护你的电脑」→ 点**更多信息 → 仍要运行**。校验文件完整性：
-> `Get-FileHash .\RemindersWidget-Setup-v0.04.exe -Algorithm SHA256`，与 Release 页面上的 `.sha256` 对照。
+> `Get-FileHash .\RemindersWidget-Setup-v0.04.exe -Algorithm SHA256`，与 Release 附件里的 `SHA256.txt` 对照。
 
 卸载：Windows 设置 → 应用 → 提醒事项小组件 → 卸载；也可以直接运行安装目录里的 `Uninstall.exe`。
 
