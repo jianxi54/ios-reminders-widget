@@ -44,12 +44,9 @@ if (-not (Test-Path $nodeSrc)) { throw '未找到 node.exe，请安装 Node.js �
 Step ("Node 运行时: " + $nodeSrc + "  (" + [Math]::Round((Get-Item $nodeSrc).Length / 1MB, 1) + " MB)")
 
 # ---------- 图标 ----------
-$ico = Join-Path $setupDir 'app.ico'
-if (-not $SkipIcon -and -not (Test-Path $ico)) {
-    Step '生成图标…'
-    & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'make-icon.ps1') | Out-Null
-}
-if (-not (Test-Path $ico)) { throw '缺少 packaging\setup\app.ico' }
+# 唯一图标源：assets\app.ico（由 tools\make-icon.py 生成并入库），宿主、安装器、卸载器共用
+$ico = Join-Path $root 'assets\app.ico'
+if (-not (Test-Path $ico)) { throw '缺少 assets\app.ico，先运行 python tools\make-icon.py 生成' }
 
 # ---------- 版本信息 ----------
 $buildInfo = Join-Path $setupDir 'BuildInfo.cs'

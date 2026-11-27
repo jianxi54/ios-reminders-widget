@@ -22,7 +22,7 @@ body:
     attributes:
       label: 小组件版本
       description: 设置抽屉底部，或托盘提示里显示的 V0.0x
-      placeholder: V0.03
+      placeholder: V0.04
     validations:
       required: true
 

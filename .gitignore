@@ -6,7 +6,6 @@ packaging/_work/
 packaging/runtime/
 packaging/setup/payload.zip
 packaging/setup/BuildInfo.cs
-packaging/setup/app.ico
 bin/
 obj/
 *.user

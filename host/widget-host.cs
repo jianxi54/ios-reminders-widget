@@ -16,6 +16,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
@@ -27,9 +28,21 @@ namespace RemindersWidgetHost
 {
     static class Program
     {
+        // 单实例：一个登录会话里只允许一个宿主进程
+        private const string MUTEX_NAME = @"Local\RemindersWidget.Host.SingleInstance";
+        private const string ACTIVATE_EVENT = @"Local\RemindersWidget.Host.Activate";
+        private static Mutex _instanceMutex;
+
         [STAThread]
         static void Main()
         {
+            // 已经有实例在跑 → 通知它把窗口显示出来，然后自己退出
+            if (!AcquireSingleInstance())
+            {
+                SignalExistingInstance();
+                return;
+            }
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             AppDomain.CurrentDomain.UnhandledException += delegate(object s, UnhandledExceptionEventArgs e)
@@ -52,6 +65,71 @@ namespace RemindersWidgetHost
                 MessageBox.Show("小组件启动失败：" + ex.Message + "\n\n日志：" + LogPath, "提醒事项小组件",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            finally
+            {
+                ReleaseSingleInstance();
+            }
+        }
+
+        /** 命名事件：第二个实例 Set，当前实例收到后把窗口显示出来 */
+        internal static EventWaitHandle CreateActivateEvent()
+        {
+            return new EventWaitHandle(false, EventResetMode.AutoReset, ACTIVATE_EVENT);
+        }
+
+        private static bool AcquireSingleInstance()
+        {
+            try
+            {
+                _instanceMutex = new Mutex(false, MUTEX_NAME);
+                try
+                {
+                    return _instanceMutex.WaitOne(0, false);
+                }
+                catch (AbandonedMutexException)
+                {
+                    return true;   // 上一个实例是异常退出的，直接接管
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("single-instance check failed: " + ex.Message);
+                return true;   // 连检查都失败时，宁可让用户能打开
+            }
+        }
+
+        private static void ReleaseSingleInstance()
+        {
+            try
+            {
+                if (_instanceMutex == null) return;
+                _instanceMutex.ReleaseMutex();
+                _instanceMutex.Dispose();
+                _instanceMutex = null;
+            }
+            catch { }
+        }
+
+        private static void SignalExistingInstance()
+        {
+            // 已有实例可能刚启动、监听还没建好，重试约 1.5 秒
+            for (int i = 0; i < 15; i++)
+            {
+                try
+                {
+                    EventWaitHandle ev;
+                    if (EventWaitHandle.TryOpenExisting(ACTIVATE_EVENT, out ev))
+                    {
+                        ev.Set();
+                        ev.Close();
+                        Log("second instance: signaled existing instance");
+                        return;
+                    }
+                }
+                catch { }
+                System.Threading.Thread.Sleep(100);
+            }
+            Log("second instance: no listener, exit");
         }
 
         internal static string LogPath = Path.Combine(Path.GetTempPath(), "RemindersWidgetHost.log");
@@ -66,11 +144,12 @@ namespace RemindersWidgetHost
     {
         private const string SERVER_URL = "http://127.0.0.1:8642/";
         private const int SERVER_PORT = 8642;
-        private const string APP_VERSION = "0.03";   // 与服务端 lib/version.js 保持一致（CI 会校验）
+        private const string APP_VERSION = "0.04";   // 与服务端 lib/version.js 保持一致（CI 会校验）
 
         private WebView2 webView;
         private NotifyIcon tray;
         private ToolStripMenuItem miPin;
+        private EventWaitHandle _activateEvent;
         private bool pinned = false;
         private bool settingsPinned = false;   // 上次退出时是否处于固定状态
         private long savedStyle = 0;
@@ -143,6 +222,7 @@ namespace RemindersWidgetHost
                 ApplyRoundRegion(); // 近似 iOS 小组件的大圆角（20px）
                 Program.Log("OnLoad: tray");
                 InitTray();
+                StartActivateListener();   // 第二个实例点开时把窗口叫出来
                 Program.Log("OnLoad: done");
             }
             catch (Exception ex) { Program.Log("OnLoad: " + ex); }
@@ -490,21 +570,85 @@ namespace RemindersWidgetHost
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 g.SmoothingMode = SmoothingMode.AntiAlias;
-                using (SolidBrush bg = new SolidBrush(Color.FromArgb(10, 132, 255)))
+                g.Clear(Color.Transparent);
+                // 与 assets/app.ico 同一套视觉：蓝色渐变圆角方块 + 白色对勾
+                int pad = 1, box = 30, arc = 7, d = arc * 2;
                 using (GraphicsPath p = new GraphicsPath())
                 {
-                    p.AddArc(2, 2, 28, 28, 0, 360);
-                    g.FillPath(bg, p);
+                    p.AddArc(pad, pad, d, d, 180, 90);
+                    p.AddArc(pad + box - d, pad, d, d, 270, 90);
+                    p.AddArc(pad + box - d, pad + box - d, d, d, 0, 90);
+                    p.AddArc(pad, pad + box - d, d, d, 90, 90);
+                    p.CloseFigure();
+                    using (LinearGradientBrush bg = new LinearGradientBrush(
+                        new Point(0, 0), new Point(32, 32),
+                        Color.FromArgb(66, 161, 255), Color.FromArgb(0, 98, 212)))
+                    {
+                        g.FillPath(bg, p);
+                    }
                 }
-                using (Pen pen = new Pen(Color.White, 4f))
+                using (Pen pen = new Pen(Color.White, 3.6f))
                 {
                     pen.StartCap = LineCap.Round;
                     pen.EndCap = LineCap.Round;
-                    g.DrawLine(pen, 9, 17, 14, 22);
-                    g.DrawLine(pen, 14, 22, 24, 10);
+                    pen.LineJoin = LineJoin.Round;
+                    g.DrawLine(pen, 8.5f, 16.5f, 13.5f, 21.8f);
+                    g.DrawLine(pen, 13.5f, 21.8f, 23.8f, 10.2f);
                 }
                 return Icon.FromHandle(bmp.GetHicon());
             }
+        }
+
+        // ---------- 单实例唤醒 ----------
+        private void StartActivateListener()
+        {
+            try
+            {
+                _activateEvent = Program.CreateActivateEvent();
+                Thread t = new Thread(ActivateLoop);
+                t.IsBackground = true;
+                t.Name = "activate-listener";
+                t.Start();
+                Program.Log("activate listener started");
+            }
+            catch (Exception ex) { Program.Log("activate listener: " + ex.Message); }
+        }
+
+        private void ActivateLoop()
+        {
+            while (true)
+            {
+                try
+                {
+                    if (!_activateEvent.WaitOne()) return;
+                }
+                catch { return; }
+
+                // 事件来自后台线程，切回 UI 线程再动窗口
+                try { BeginInvoke(new Action(RevealFromSecondInstance)); }
+                catch (InvalidOperationException) { return; }   // 窗口句柄已释放
+                catch { }
+            }
+        }
+
+        private void RevealFromSecondInstance()
+        {
+            Program.Log("reveal from second instance");
+            try
+            {
+                if (!Visible) Visible = true;
+                Show();
+                if (!pinned)
+                {
+                    if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
+                    Activate();
+                    // TopMost 翻转是强制前置最可靠的办法，单纯 Activate 常被系统忽略
+                    TopMost = true;
+                    TopMost = false;
+                    BringToFront();
+                }
+            }
+            catch (Exception ex) { Program.Log("reveal: " + ex.Message); }
         }
 
         private static bool IsAutoStart()

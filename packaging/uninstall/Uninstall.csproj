@@ -14,13 +14,13 @@
     <!-- 复用安装器源码，去掉安装载荷，只保留卸载能力 -->
     <DefineConstants>$(DefineConstants);UNINSTALLER</DefineConstants>
     <ApplicationManifest>..\setup\app.manifest</ApplicationManifest>
-    <ApplicationIcon>..\setup\app.ico</ApplicationIcon>
+    <ApplicationIcon>..\..\assets\app.ico</ApplicationIcon>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <Company>RemindersWidget</Company>
+    <Company>jianxi54</Company>
     <Product>RemindersWidget</Product>
     <AssemblyTitle>RemindersWidget Uninstaller</AssemblyTitle>
-    <FileVersion>0.03.0.0</FileVersion>
-    <AssemblyVersion>0.03.0.0</AssemblyVersion>
+    <FileVersion>0.04.0.0</FileVersion>
+    <AssemblyVersion>0.04.0.0</AssemblyVersion>
     <DebugType>none</DebugType>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>

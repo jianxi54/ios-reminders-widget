@@ -11,14 +11,14 @@
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>app.ico</ApplicationIcon>
+    <ApplicationIcon>..\..\assets\app.ico</ApplicationIcon>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <Company>RemindersWidget</Company>
+    <Company>jianxi54</Company>
     <Product>RemindersWidget</Product>
     <Description>iOS Reminders desktop widget for Windows 11</Description>
-    <FileVersion>0.03.0.0</FileVersion>
-    <AssemblyVersion>0.03.0.0</AssemblyVersion>
-    <Version>0.03</Version>
+    <FileVersion>0.04.0.0</FileVersion>
+    <AssemblyVersion>0.04.0.0</AssemblyVersion>
+    <Version>0.04</Version>
     <DebugType>none</DebugType>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>

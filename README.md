@@ -24,13 +24,13 @@
 | 运行时 | WebView2（Windows 11 自带；Windows 10 缺失时安装向导会提示） |
 | 权限 | 无需管理员权限，装到当前用户目录 |
 
-1. 到 [Releases](https://github.com/jianxi54/ios-reminders-widget/releases/latest) 下载 `RemindersWidget-Setup-v0.03.exe`，双击，按向导完成（可选桌面快捷方式、开机自启）。
+1. 到 [Releases](https://github.com/jianxi54/ios-reminders-widget/releases/latest) 下载 `RemindersWidget-Setup-v0.04.exe`，双击，按向导完成（可选桌面快捷方式、开机自启）。
 2. 首次启动后点右上角齿轮 → **打开浏览器登录**。
 3. 在弹出的浏览器窗口里用 Apple ID 登录（含双重验证）。登录完成后窗口自动同步。
 4. 想收手机推送，在设置里填 Bark 的 Key（见下文）。
 
 > 安装包没有代码签名，首次运行 Windows 会弹「已保护你的电脑」→ 点**更多信息 → 仍要运行**。校验文件完整性：
-> `Get-FileHash .\RemindersWidget-Setup-v0.03.exe -Algorithm SHA256`，与 Release 页面上的 `.sha256` 对照。
+> `Get-FileHash .\RemindersWidget-Setup-v0.04.exe -Algorithm SHA256`，与 Release 页面上的 `.sha256` 对照。
 
 卸载：Windows 设置 → 应用 → 提醒事项小组件 → 卸载；也可以直接运行安装目录里的 `Uninstall.exe`。
 
@@ -163,7 +163,7 @@ build-host.bat
 :: 2. 开发模式直接跑（用系统 Node）
 start-widget.bat
 
-:: 3. 打包安装程序 → dist\RemindersWidget-Setup-v0.03.exe
+:: 3. 打包安装程序 → dist\RemindersWidget-Setup-v0.04.exe
 powershell -ExecutionPolicy Bypass -File packaging\build.ps1
 ```
 
@@ -185,10 +185,10 @@ ios-reminders-widget/
 ├─ host/                    WinForms + WebView2 原生宿主（C#，net48）
 ├─ packaging/
 │  ├─ build.ps1             一键打包
-│  ├─ make-icon.ps1         生成图标
 │  ├─ setup/                安装向导（内嵌载荷）
 │  └─ uninstall/            卸载器（复用安装器源码，不含载荷）
-├─ tools/                   开发与验收脚本
+├─ assets/                  app.ico（唯一图标源）
+├─ tools/                   开发与验收脚本（含 make-icon.py 生成图标）
 ├─ docs/                    截图
 ├─ .github/                 CI、Issue 表单、PR 模板
 ├─ CHANGELOG.md             每个版本的改动明细
